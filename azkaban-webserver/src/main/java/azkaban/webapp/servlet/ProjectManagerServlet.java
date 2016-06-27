@@ -452,7 +452,8 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
     if (project == null) {
       this.setErrorMessageInCookie(resp, "Project " + projectName
           + " doesn't exist.");
-      resp.sendRedirect(req.getContextPath());
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + req.getContextPath());
       return;
     }
 
@@ -470,7 +471,8 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
       if (projectFileHandler == null) {
         this.setErrorMessageInCookie(resp, "Project " + projectName
             + " with version " + version + " doesn't exist");
-        resp.sendRedirect(req.getContextPath());
+        String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+        resp.sendRedirect(scheme + "://" + req.getServerName() + req.getContextPath());
         return;
       }
       File projectZipFile = projectFileHandler.getLocalFile();
@@ -580,14 +582,16 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
     if (project == null) {
       this.setErrorMessageInCookie(resp, "Project " + projectName
           + " doesn't exist.");
-      resp.sendRedirect(req.getContextPath());
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + req.getContextPath());
       return;
     }
 
     if (!hasPermission(project, user, Type.ADMIN)) {
       this.setErrorMessageInCookie(resp,
           "Cannot delete. User '" + user.getUserId() + "' is not an ADMIN.");
-      resp.sendRedirect(req.getRequestURI() + "?project=" + projectName);
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + req.getRequestURI() + "?project=" + projectName);
       return;
     }
 
@@ -608,8 +612,8 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
     if (sflow != null) {
       this.setErrorMessageInCookie(resp, "Cannot delete. Please unschedule "
           + sflow.getScheduleName() + ".");
-
-      resp.sendRedirect(req.getRequestURI() + "?project=" + projectName);
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + req.getRequestURI() + "?project=" + projectName);
       return;
     }
 
@@ -624,7 +628,8 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
     if (exflow != null) {
       this.setErrorMessageInCookie(resp, "Cannot delete. Executable flow "
           + exflow.getExecutionId() + " is still running.");
-      resp.sendRedirect(req.getRequestURI() + "?project=" + projectName);
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + req.getRequestURI() + "?project=" + projectName);
       return;
     }
 
@@ -632,13 +637,15 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
       projectManager.removeProject(project, user);
     } catch (ProjectManagerException e) {
       this.setErrorMessageInCookie(resp, e.getMessage());
-      resp.sendRedirect(req.getRequestURI() + "?project=" + projectName);
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + req.getRequestURI() + "?project=" + projectName);
       return;
     }
 
     this.setSuccessMessageInCookie(resp, "Project '" + projectName
         + "' was successfully deleted.");
-    resp.sendRedirect(req.getContextPath());
+    String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+    resp.sendRedirect(scheme + "://" + req.getServerName() + req.getContextPath());
   }
 
   private void ajaxChangeDescription(Project project,
@@ -1717,8 +1724,8 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
     if (ret.containsKey("warn")) {
       setWarnMessageInCookie(resp, ret.get("warn"));
     }
-
-    resp.sendRedirect(req.getRequestURI() + "?project=" + projectName);
+    String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+    resp.sendRedirect(scheme + "://" + req.getServerName() + req.getRequestURI() + "?project=" + projectName);
   }
 
   private static class NodeLevelComparator implements Comparator<Node> {

@@ -42,12 +42,15 @@ public class IndexRedirectServlet extends LoginAbstractAzkabanServlet {
   @Override
   protected void handleGet(HttpServletRequest req, HttpServletResponse resp,
       Session session) throws ServletException, IOException {
-    resp.sendRedirect(defaultServletPath);
+    String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+     resp.sendRedirect(scheme + "://" + req.getServerName() + defaultServletPath);
   }
 
   @Override
   protected void handlePost(HttpServletRequest req, HttpServletResponse resp,
       Session session) throws ServletException, IOException {
-    resp.sendRedirect(defaultServletPath);
+    
+String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme + "://" + req.getServerName() + defaultServletPath);
   }
 }

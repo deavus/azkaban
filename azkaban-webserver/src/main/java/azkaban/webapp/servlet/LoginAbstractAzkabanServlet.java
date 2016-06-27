@@ -102,7 +102,8 @@ public abstract class LoginAbstractAzkabanServlet extends
     Session session = getSessionFromRequest(req);
     logRequest(req, session);
     if (hasParam(req, "logout")) {
-      resp.sendRedirect(req.getContextPath());
+      String scheme = req.getHeader("x-forwarded-proto") != null ? req.getHeader("x-forwarded-proto") : req.getScheme();
+      resp.sendRedirect(scheme  + "://" + req.getServerName() + req.getContextPath());
       if (session != null) {
         getApplication().getSessionCache()
             .removeSession(session.getSessionId());
@@ -138,7 +139,7 @@ public abstract class LoginAbstractAzkabanServlet extends
    */
   private void logRequest(HttpServletRequest req, Session session) {
     StringBuilder buf = new StringBuilder();
-    buf.append(req.getRemoteAddr()).append(" ");
+    buf.append(getRemoteAddress(req)).append(" ");
     if (session != null && session.getUser() != null) {
       buf.append(session.getUser().getUserId()).append(" ");
     } else {
@@ -210,9 +211,15 @@ public abstract class LoginAbstractAzkabanServlet extends
     return false;
   }
 
+  private String getRemoteAddress(HttpServletRequest req) {
+
+    return req.getHeader("x-forwarded-for") != null ? req.getHeader("x-forwarded-for") : req.getRemoteAddr();
+
+  }
+
   private Session getSessionFromRequest(HttpServletRequest req)
       throws ServletException {
-    String remoteIp = req.getRemoteAddr();
+    String remoteIp =  getRemoteAddress(req);
     Cookie cookie = getCookieByName(req, SESSION_ID_NAME);
     String sessionId = null;
 
@@ -269,7 +276,7 @@ public abstract class LoginAbstractAzkabanServlet extends
         // See if the session id is properly set.
         if (params.containsKey("session.id")) {
           String sessionId = (String) params.get("session.id");
-          String ip = req.getRemoteAddr();
+          String ip = getRemoteAddress(req);
 
           session = getSessionFromSessionId(sessionId, ip);
           if (session != null) {
@@ -286,7 +293,7 @@ public abstract class LoginAbstractAzkabanServlet extends
 
         String username = (String) params.get("username");
         String password = (String) params.get("password");
-        String ip = req.getRemoteAddr();
+        String ip = getRemoteAddress(req);
 
         try {
           session = createSession(username, password, ip);
@@ -333,7 +340,7 @@ public abstract class LoginAbstractAzkabanServlet extends
       throws UserManagerException, ServletException {
     String username = getParam(req, "username");
     String password = getParam(req, "password");
-    String ip = req.getRemoteAddr();
+    String ip = getRemoteAddress(req);
 
     return createSession(username, password, ip);
   }
